@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/doublefriedtofu/tinyapp/issues"
   },
-  "homepage": "https://github.com/doublefriedtofu/tinyapp#readme"
+  "homepage": "https://github.com/doublefriedtofu/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
