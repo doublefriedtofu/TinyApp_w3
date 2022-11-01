@@ -27,23 +27,23 @@
         <tbody>
           <% for (let id in urls) { %>
             <tr>
-                  <form method="GET" action="/urls/<%= id %>">
-                    <form method="POST" action="/urls/<%= id %>/delete">
-                  <td>
-                    <%= id %>
-                  </td>
-                  <td>
-                    <%= urls[id] %>
-                  </td>
-                  <td>
-                    <button type="submit" class="btn btn-primary">Edit</button>
-                  </td>
-                  <td>
-                    <button type="submit" class="btn btn-secondary">Delete</button>
-                  </td>
-                </tr>
-              </form>
-            </form>
+              <td>
+                <%= id %>
+              </td>
+              <td>
+                <%= urls[id] %>
+              </td>
+              <td>
+                <form method="GET" action="/urls/<%= id %>">
+                  <button type="submit" class="btn btn-outline-primary">Edit</button>
+                </form>
+              </td>
+              <td>
+                <form method="POST" action="/urls/<%= id %>/delete">
+                  <button type="submit" class="btn btn-outline-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
             <% } %>
         </tbody>
       </table>
