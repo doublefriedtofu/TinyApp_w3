@@ -58,12 +58,20 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// edits the short URL using POST
+app.post("/urls/:id", (req, res) =>{
+  const id = req.params.id;
+  delete urlDatabase[id];
+  res.redirect("/urls")
+})
+
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
   res.redirect(longURL);
 });
 
+// deletes the URL using POST
 app.post("/urls/:id/delete", (req, res) =>{
   const id = req.params.id;
   delete urlDatabase[id];
