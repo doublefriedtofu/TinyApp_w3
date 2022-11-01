@@ -8,7 +8,7 @@ const PORT = 8080;
 app.use(express.urlencoded({ extended: true }));
 
 //tells the express app to use EJS as its templating engine
-app.set("view engine", "ejs"); 
+app.set("view engine", "ejs");
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -37,7 +37,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-// adds a new route(page) to submit long url 
+// adds a new route(page) to submit long url
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
@@ -47,9 +47,9 @@ app.post("/urls", (req, res) => {
   // log the POST request body to the console
   console.log(req.body);
   // response after a submit button
-  const shortURL = generateRandomString()
-  urlDatabase[shortURL] = req.body.longURL
-  res.redirect(`/urls/${shortURL}`)
+  const shortURL = generateRandomString();
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect(`/urls/${shortURL}`);
 });
 
 // added a another route for /urls/:id; ":" tells that id is a route parameter
@@ -67,9 +67,9 @@ app.get("/u/:id", (req, res) => {
 const generateRandomString  = () => {
   let randomString = "";
   for (let i = 0; i < 6; i++) {
-    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
-    randomString += alphabet[Math.floor(Math.random() * alphabet.length)]
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+    randomString += alphabet[Math.floor(Math.random() * alphabet.length)];
   }
   return randomString;
-}
+};
 
