@@ -2,6 +2,11 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 
+// after submitting the POST request, the data is sent as a buffer.
+// This line is to read that data.
+// if req.body is undefined, this line might be wrong.
+app.use(express.urlencoded({ extended: true }));
+
 //tells the express app to use EJS as its templating engine
 app.set("view engine", "ejs"); 
 
@@ -31,6 +36,19 @@ app.get("/urls", (req, res) => {
   const templateVars = {urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
+
+// adds a new route(page) to submit long url 
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+})
+
+// using POST request to handle the "submit" button
+app.post("/urls", (req, res) => {
+  // log the POST request body to the console
+  console.log(req.body);
+  // response
+  res.send("Ok")
+})
 
 // added a another route for /urls/:id; ":" tells that id is a route parameter
 app.get("/urls/:id", (req, res) => {
