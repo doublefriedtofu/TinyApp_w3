@@ -40,18 +40,28 @@ app.get("/urls", (req, res) => {
 // adds a new route(page) to submit long url 
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
-})
+});
 
 // using POST request to handle the "submit" button
 app.post("/urls", (req, res) => {
   // log the POST request body to the console
   console.log(req.body);
-  // response
-  res.send("Ok")
-})
+  // response after a submit button
+  res.send(generateRandomString())
+});
 
 // added a another route for /urls/:id; ":" tells that id is a route parameter
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
-})
+});
+
+const generateRandomString  = () => {
+  let randomString = "";
+  for (let i = 0; i < 6; i++) {
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
+    randomString += alphabet[Math.floor(Math.random() * alphabet.length)]
+  }
+  return randomString;
+}
+
