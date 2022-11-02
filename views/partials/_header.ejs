@@ -1,24 +1,29 @@
 <!-- the file name starts with underscore -->
-
 <header>
   <nav class="navbar navbar-expand-md navbar-dark bg-success">
     <a class="navbar-brand" href="/urls">TinyApp</a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-toggle="collapse"
-      data-target="#navbarNavAltMarkup"
-      aria-controls="navbarNavAltMarkup"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarNavAltMarkup">
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
+      <% if(user) { %>
+        <div class="d-flex">
+          <p>Logged in as: <%= user %>!</p>
+          <button type="submit" class="btn btn-warning">sign out</button>
+        </div>
+        <% } else { %>
+          <form method="POST" action="/login">
+            <div class="d-flex">
+              <input class="form-control" type="text" name="user" placeholder="username" style="width: 200px;" />
+              <button type="submit" class="btn btn-primary">sign in</button>
+            </div>
+          </form>
+          <% } %>
     </div>
   </nav>
 </header>
