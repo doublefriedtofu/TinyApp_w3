@@ -90,11 +90,11 @@ app.get("/register", (req, res) => {
 });
 
 // a login route
-// app.get("/login", (req, res) => {
-//   const templateVars = {
-//     user: req.cookies["username"]
-//   };  res.render("login", templateVars)
-// })git 
+app.get("/login", (req, res) => {
+  const templateVars = {
+    user: req.cookies["username"]
+  };  res.render("login_page", templateVars)
+})
 
 // signs in using a cookie
 app.post("/login", (req, res) => {
@@ -162,7 +162,6 @@ const generateRandomString = () => {
 const findUsers = (newUserEmail) => {
   for (const [key, value] of Object.entries(users)) {
     const usersToCheck = value["email"];
-    console.log("Function Value: " + usersToCheck)
     if (usersToCheck === newUserEmail) {
       return value;
     }
