@@ -18,14 +18,18 @@
             <button type="submit" class="btn btn-warning">sign out</button>
           </div>
           <% } else { %>
-            <form method="POST" action="/login">
+            <form method="GET" action="/login">
               <div class="d-flex">
-                <input class="form-control" type="email" name="email" placeholder="username" style="width: 200px;" />
-                <button type="submit" class="btn btn-primary">sign in</button>
+                <button type="submit" class="btn btn-primary">Sign In</button>
               </div>
             </form>
+            <form method="GET" action="/login">
+              <div class="d-flex">
+                <button type="submit" class="btn btn-primary">register</button>
+              </div>
+            </form>
+          </form>
             <% } %>
-        </form>
     </div>
   </nav>
 </header>
