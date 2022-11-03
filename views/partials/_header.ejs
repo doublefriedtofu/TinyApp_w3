@@ -13,23 +13,17 @@
       </div>
       <% if(user) { %>
         <form method="POST" action="/logout">
-          <div class="d-flex">
+          <div class="navbar-nav">
             <p>Logged in as: <%= user.email %>!</p>
-            <button type="submit" class="btn btn-warning">Sign out</button>
+            <button type="submit" class="btn btn-outline">Logout</button>
           </div>
         </form>
-          <% } else { %>
-            <form method="GET" action="/login">
-              <div class="d-flex">
-                <button type="submit" class="btn btn-primary">Sign In</button>
-              </div>
-            </form>
-            <form method="GET" action="/register">
-              <div class="d-flex">
-                <button type="submit" class="btn btn-primary">register</button>
-              </div>
-            </form>
-            <% } %>
+        <% } else { %>
+          <div class="navbar-nav">
+            <a class="nav-item nav-link" href="/login">Login</a>
+            <a class="nav-item nav-link" href="/register">Register</a>
+          </div>
+        <% } %>
     </div>
   </nav>
 </header>

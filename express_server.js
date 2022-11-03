@@ -21,7 +21,7 @@ const users = {
   user1RandomID: {
     id: "user1RandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+    password: "123",
   },
   user2RandomID: {
     id: "user2RandomID",
@@ -45,7 +45,9 @@ app.get("/urls.json", (req, res) => {
 
 // a route for /urls
 app.get("/urls", (req, res) => {
-  const foundUserInfo = findUsers(req.cookies["user"]);
+  console.log("cookies: " ,req.cookies)
+  const foundUserInfo = findUsersByID(req.cookies["user_id"]);
+  console.log(foundUserInfo)
   // find the block of object
   const templateVars = {
     user: foundUserInfo,
@@ -56,7 +58,7 @@ app.get("/urls", (req, res) => {
 
 // adds a new route(page) to submit long url
 app.get("/urls/new", (req, res) => {
-  const foundUserInfo = findUsers(req.cookies["user"]);
+  const foundUserInfo = findUsersByID(req.cookies["user_id"]);
   // find the block of object
   const templateVars = {
     user: foundUserInfo
@@ -66,10 +68,13 @@ app.get("/urls/new", (req, res) => {
 
 // added a another route for /urls/:id; ":" tells that id is a route parameter
 app.get("/urls/:id", (req, res) => {
+  const foundUserInfo = findUsersByID(req.cookies["user_id"]);
+  // find the block of object
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
-    user: req.cookies["username"]
+    user: foundUserInfo,
+    urls: urlDatabase
   };
   res.render("urls_show", templateVars);
 });
@@ -84,7 +89,7 @@ app.get("/u/:id", (req, res) => {
 // register route
 app.get("/register", (req, res) => {
   const templateVars = {
-    user: req.cookies["username"]
+    user: req.cookies["user_id"]
   };
   res.render("register", templateVars);
 });
@@ -92,20 +97,25 @@ app.get("/register", (req, res) => {
 // a login route
 app.get("/login", (req, res) => {
   const templateVars = {
-    user: req.cookies["username"]
-  };  res.render("login_page", templateVars)
+    user: req.cookies["user_id"]
+  };  
+  res.render("login_page", templateVars)
 })
 
 // signs in using a cookie
 app.post("/login", (req, res) => {
-  res.cookie('user', req.body.email);
-  res.redirect("/urls");
+  const foundUser = findUsers(req.body.email)
+  const inputUserPass = req.body.inputPassword
+  if (foundUser && foundUser.password === inputUserPass) {
+  const userID = foundUser.id
+  res.cookie('user_id', userID);
+  return res.redirect("/urls");
+  }
+  return res.end('<html><head><title>403: Forbidden</title></head><body><h1>403: Forbidden</h1></body></html>');
 });
 
 // using POST request to handle the "submit" button
 app.post("/urls", (req, res) => {
-  // log the POST request body to the console
-  console.log(req.body);
   // response after a submit button
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
@@ -128,9 +138,22 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // logout request
 app.post("/logout", (req, res) => {
-  res.clearCookie("user");
-  res.redirect("/urls");
+  res.clearCookie("user_id");
+  res.redirect("/login");
 });
+/////////////////////////////////////
+// signs in using a cookie
+app.post("/login", (req, res) => {
+  const foundUser = findUsers(req.body.email)
+  const inputUserPass = req.body.inputPassword
+  if (foundUser && foundUser.password === inputUserPass) {
+  const userID = foundUser.id
+  res.cookie('user_id', userID);
+  return res.redirect("/urls");
+  }
+  return res.end('<html><head><title>403: Forbidden</title></head><body><h1>403: Forbidden</h1></body></html>');
+});
+
 
 app.post("/register", (req, res) => {
   const randomUserID = generateRandomString();
@@ -144,9 +167,9 @@ app.post("/register", (req, res) => {
   getUserByEmail(newUserInfo, res)
 
   if (!findUsers(newUserEmail)) {
-    users.randomUserID = newUserInfo;
+    users[randomUserID] = newUserInfo;
   }
-  res.cookie('randomUserID', randomUserID);
+  res.cookie('user_id', randomUserID);
   res.redirect("/urls");
 });
 
@@ -169,11 +192,16 @@ const findUsers = (newUserEmail) => {
   return;
 };
 
+const findUsersByID = (userID) => {
+  return users[userID];
+};
+
 const getUserByEmail = (inputInfo, res) => {
   if (!inputInfo.email || !inputInfo.password) {
-  return res.end('<html><head><title>404: Page Not Found</title></head><body><h1>404: Page Not Found</h1></body></html>');
+    return res.end('<html><head><title>403: Forbidden</title></head><body><h1>403: Forbidden</h1></body></html>');
   }
   if (findUsers(inputInfo.email)) {
-  return res.end('<html><head><title>404: Page Not Found</title></head><body><h1>404: Page Not Found</h1></body></html>');
+    return res.end('<html><head><title>403: Forbidden</title></head><body><h1>403: Forbidden</h1></body></html>');
   }
+  return;
 }
