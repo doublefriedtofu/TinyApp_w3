@@ -45,9 +45,7 @@ app.get("/urls.json", (req, res) => {
 
 // a route for /urls
 app.get("/urls", (req, res) => {
-  console.log("cookies: " ,req.cookies)
   const foundUserInfo = findUsersByID(req.cookies["user_id"]);
-  console.log(foundUserInfo)
   // find the block of object
   const templateVars = {
     user: foundUserInfo,
@@ -98,18 +96,18 @@ app.get("/register", (req, res) => {
 app.get("/login", (req, res) => {
   const templateVars = {
     user: req.cookies["user_id"]
-  };  
-  res.render("login_page", templateVars)
-})
+  };
+  res.render("login_page", templateVars);
+});
 
 // signs in using a cookie
 app.post("/login", (req, res) => {
-  const foundUser = findUsers(req.body.email)
-  const inputUserPass = req.body.inputPassword
+  const foundUser = findUsers(req.body.email);
+  const inputUserPass = req.body.inputPassword;
   if (foundUser && foundUser.password === inputUserPass) {
-  const userID = foundUser.id
-  res.cookie('user_id', userID);
-  return res.redirect("/urls");
+    const userID = foundUser.id;
+    res.cookie('user_id', userID);
+    return res.redirect("/urls");
   }
   return res.end('<html><head><title>403: Forbidden</title></head><body><h1>403: Forbidden</h1></body></html>');
 });
@@ -144,12 +142,12 @@ app.post("/logout", (req, res) => {
 /////////////////////////////////////
 // signs in using a cookie
 app.post("/login", (req, res) => {
-  const foundUser = findUsers(req.body.email)
-  const inputUserPass = req.body.inputPassword
+  const foundUser = findUsers(req.body.email);
+  const inputUserPass = req.body.inputPassword;
   if (foundUser && foundUser.password === inputUserPass) {
-  const userID = foundUser.id
-  res.cookie('user_id', userID);
-  return res.redirect("/urls");
+    const userID = foundUser.id;
+    res.cookie('user_id', userID);
+    return res.redirect("/urls");
   }
   return res.end('<html><head><title>403: Forbidden</title></head><body><h1>403: Forbidden</h1></body></html>');
 });
@@ -164,7 +162,7 @@ app.post("/register", (req, res) => {
     email: newUserEmail,
     password: newUserPassword
   };
-  getUserByEmail(newUserInfo, res)
+  getUserByEmail(newUserInfo, res);
 
   if (!findUsers(newUserEmail)) {
     users[randomUserID] = newUserInfo;
@@ -204,4 +202,4 @@ const getUserByEmail = (inputInfo, res) => {
     return res.end('<html><head><title>403: Forbidden</title></head><body><h1>403: Forbidden</h1></body></html>');
   }
   return;
-}
+};
