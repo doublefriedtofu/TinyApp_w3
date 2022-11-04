@@ -1,9 +1,9 @@
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080;
-const { getUserByEmail } = require("./helpers.js")
+const { getUserByEmail } = require("./helpers.js");
 
 // after submitting the POST request, the data is sent as a buffer.
 // This line is to read that data.
@@ -15,14 +15,14 @@ app.use(cookieSession({
 
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}))
+}));
 
 
 //tells the express app to use EJS as its templating engine
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  b2xVn2: { 
+  b2xVn2: {
     longURL: "http://www.lighthouselabs.ca",
     userID: "user1RandomID"
   },
@@ -54,8 +54,8 @@ const users = {
 };
 
 app.get("/", (req, res) => {
-    return res.redirect("/urls");
-  });
+  return res.redirect("/urls");
+});
 
 // sends a message to conosle that server is running
 app.listen(PORT, () => {
@@ -69,7 +69,7 @@ app.get("/urls.json", (req, res) => {
 ////////////////////// a route for /urls
 app.get("/urls", (req, res) => {
   const foundUserInfo = findUsersByID(req.session["user_id"]);
-  if(!foundUserInfo) {
+  if (!foundUserInfo) {
     return res.end('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">Login</button></form><form method="GET" action="/register"><button type="submit" class="btn btn-outline-primary">Register</button></form></html>');
   }
   // find the block of object
@@ -89,7 +89,7 @@ app.get("/urls/new", (req, res) => {
   };
   if (!templateVars.user) {
     return res.redirect("/login");
-    }
+  }
   return res.render("urls_new", templateVars);
 });
 
@@ -97,7 +97,7 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const foundUserInfo = findUsersByID(req.session["user_id"]);
   // error message if not logged in
-  if(!foundUserInfo) {
+  if (!foundUserInfo) {
     return res.end('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">login</button></form><form method="GET" action="/register"><button type="submit" class="btn btn-outline-primary">Register</button></form></html>');
   }
   // find the block of object
@@ -127,7 +127,7 @@ app.get("/register", (req, res) => {
     // if the user is logged in, go to /urls otherwise to /register
   if (templateVars.user) {
     return res.redirect("/urls");
-    }    
+  }
   return res.render("register", templateVars);
 });
 
@@ -139,7 +139,7 @@ app.get("/login", (req, res) => {
   // if the user is logged in, go to /urls otherwise to /login
   if (templateVars.user) {
     return res.redirect("/urls");
-    }    
+  }
   return res.render("login_page", templateVars);
 });
 
@@ -162,7 +162,7 @@ app.post("/login", (req, res) => {
 app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
     return res.end('You cannot create new shortened URL if you are not logged in.');
-  }   
+  }
   // response after a submit button if user is logged in
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = {
@@ -177,7 +177,7 @@ app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   if (!req.session.user_id || equalShortURL(id)) {
     return res.end('You cannot create new shortened URL if you are not logged in.');
-  } 
+  }
   urlDatabase[id] = {
     longURL: req.body.longURL,
     userID: req.session.user_id
@@ -190,7 +190,7 @@ app.post("/urls/:id/delete", (req, res) => {
   const shortURLID = req.params.id;
   if (!req.session.user_id || equalShortURL(shortURLID)) {
     return res.end('Error. You are trying to delete an URL that does not exist or that you are not signed in.');
-  }   
+  }
   delete urlDatabase[shortURLID];
   return res.redirect("/urls");
 });
@@ -208,7 +208,7 @@ app.post("/register", (req, res) => {
   const newUserPassword = req.body.inputPassword;
   // check if both input is not empty
   if (!newUserEmail || !newUserPassword) {
-    return res.send('Must fill out Email and Password'); 
+    return res.send('Must fill out Email and Password');
   }
   const hashedPassword = bcrypt.hashSync(newUserPassword, 10);
   const newUserInfo = {
@@ -221,7 +221,7 @@ app.post("/register", (req, res) => {
   } else {
     return res.send('403: Forbidden');
   }
-  console.log("New User registered!")
+  console.log("New User registered!");
   req.session.user_id = randomUserID;
   return res.redirect("/urls");
 });
@@ -249,8 +249,8 @@ const urlsForUser = (userID) => {
       filteredURL[shortURL] = urlDatabase[shortURL];
     }
   }
-  return filteredURL
-}
+  return filteredURL;
+};
 
 const equalShortURL = (shortURL) => {
   for (const shortURL in urlDatabase) {
@@ -259,4 +259,4 @@ const equalShortURL = (shortURL) => {
     }
   }
   return false;
-}
+};
