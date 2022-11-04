@@ -141,12 +141,12 @@ app.get("/login", (req, res) => {
 ////////////////////// SIGN IN REQUEST
 app.post("/login", (req, res) => {
   const foundUser = findUsersByEmail(req.body.email);
-  // if (bcrypt.compareSync(req.body.inputPassword, hashedPassword)) {;
-  const inputUserPass = req.body.inputPassword;
-  console.log(foundUser)
-  console.log(inputUserPass)
+  if (bcrypt.compareSync(req.body.inputPassword, foundUser.password)) {
+  // const inputUserPass = req.body.inputPassword;
+  // console.log("did they find them? ",foundUser)
+  // console.log(inputUserPass)
   // if user and password is in database, reutrn url otherwise, error
-  if (foundUser && foundUser.password === inputUserPass) {
+  // if (foundUser && foundUser.password === inputUserPass) {
     const userID = foundUser.id;
     res.cookie('user_id', userID);
     return res.redirect("/urls");
@@ -203,15 +203,13 @@ app.post("/register", (req, res) => {
   const newUserEmail = req.body.newUserEmail;
   const newUserPassword = req.body.inputPassword;
   // console.log("newUserPassword: ",newUserPassword)
-  // const hashedPassword = bcrypt.hashSync(newUserPassword, 10);
-  // console.log("newUserPassword: ",hashedPassword)
+  const hashedPassword = bcrypt.hashSync(newUserPassword, 10);
+  console.log("newUserPassword: ",hashedPassword)
   const newUserInfo = {
     id: randomUserID,
     email: newUserEmail,
-    password: newUserPassword
+    password: hashedPassword
   };
-  getUserByEmail(newUserInfo, res);
-
   if (getUserByEmail(newUserInfo, res)) {
     users[randomUserID] = newUserInfo;
   }
