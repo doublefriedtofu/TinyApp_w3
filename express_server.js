@@ -62,7 +62,7 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
   const foundUserInfo = findUsersByID(req.cookies["user_id"]);
   if(!foundUserInfo) {
-    return res.end('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body>            <form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">login</button><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">Register</button></html>');
+    return res.redirect("/login");
   }
   // find the block of object
   const templateVars = {
@@ -80,7 +80,7 @@ app.get("/urls/new", (req, res) => {
     user: foundUserInfo
   };
   if (!templateVars.user) {
-    return res.redirect("/login");
+    return res.end('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">login</button><form method="GET" action="/register"><button type="submit" class="btn btn-outline-primary">Register</button></html>');
     }
   return res.render("urls_new", templateVars);
 });
@@ -90,7 +90,7 @@ app.get("/urls/:id", (req, res) => {
   const foundUserInfo = findUsersByID(req.cookies["user_id"]);
   // error message if not logged in
   if(!foundUserInfo) {
-    return res.end('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body>            <form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">login</button><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">Register</button></html>');
+    return res.end('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">login</button><form method="GET" action="/register"><button type="submit" class="btn btn-outline-primary">Register</button></html>');
   }
   // find the block of object
   const templateVars = {
@@ -141,7 +141,10 @@ app.get("/login", (req, res) => {
 ////////////////////// SIGN IN REQUEST
 app.post("/login", (req, res) => {
   const foundUser = findUsers(req.body.email);
+  // if (bcrypt.compareSync(req.body.inputPassword, hashedPassword)) {;
   const inputUserPass = req.body.inputPassword;
+  console.log(foundUser)
+  console.log(inputUserPass)
   // if user and password is in database, reutrn url otherwise, error
   if (foundUser && foundUser.password === inputUserPass) {
     const userID = foundUser.id;
@@ -199,11 +202,13 @@ app.post("/register", (req, res) => {
   const randomUserID = generateRandomString();
   const newUserEmail = req.body.newUserEmail;
   const newUserPassword = req.body.inputPassword;
-  const newHashedUserPassword = bcrypt.hashSync(newUserPassword, 10);
+  // console.log("newUserPassword: ",newUserPassword)
+  // const hashedPassword = bcrypt.hashSync(newUserPassword, 10);
+  // console.log("newUserPassword: ",hashedPassword)
   const newUserInfo = {
     id: randomUserID,
     email: newUserEmail,
-    password: newHashedUserPassword
+    password: newUserPassword
   };
   getUserByEmail(newUserInfo, res);
 
