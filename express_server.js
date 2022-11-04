@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080;
 
@@ -13,8 +14,22 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b2xVn2: { 
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "user1RandomID"
+  },
+  k3m5xK: {
+    longURL: "http://www.f1google.com",
+    userID: "user2RandomID",
+  },
+  k3msdK: {
+    longURL: "http://www.f2google.com",
+    userID: "user1RandomID",
+  },
+  k3masd: {
+    longURL: "http://www.f3google.com",
+    userID: "user2RandomID",
+  },
 };
 
 const users = {
@@ -43,18 +58,21 @@ app.get("/urls.json", (req, res) => {
   return res.json(urlDatabase);
 });
 
-// a route for /urls
+////////////////////// a route for /urls
 app.get("/urls", (req, res) => {
   const foundUserInfo = findUsersByID(req.cookies["user_id"]);
+  if(!foundUserInfo) {
+    return res.end('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body>            <form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">login</button><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">Register</button></html>');
+  }
   // find the block of object
   const templateVars = {
     user: foundUserInfo,
-    urls: urlDatabase
+    urls: urlsForUser(foundUserInfo.id)
   };
   return res.render("urls_index", templateVars);
 });
 
-// adds a new route(page) to submit long url
+////////////////////// adds a new route(page) to submit long url
 app.get("/urls/new", (req, res) => {
   const foundUserInfo = findUsersByID(req.cookies["user_id"]);
   // find the block of object
@@ -67,30 +85,33 @@ app.get("/urls/new", (req, res) => {
   return res.render("urls_new", templateVars);
 });
 
-// added a another route for /urls/:id; ":" tells that id is a route parameter
+////////////////////// added a another route for /urls/:id; ":" tells that id is a route parameter
 app.get("/urls/:id", (req, res) => {
   const foundUserInfo = findUsersByID(req.cookies["user_id"]);
+  // error message if not logged in
+  if(!foundUserInfo) {
+    return res.end('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body>            <form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">login</button><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">Register</button></html>');
+  }
   // find the block of object
   const templateVars = {
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    shortURL: req.params.id,
     user: foundUserInfo,
-    urls: urlDatabase
+    urls: urlsForUser(foundUserInfo.id)
   };
   return res.render("urls_show", templateVars);
 });
 
-// redirects to the longURL page when clicked
+////////////////////// redirects to the longURL page when clicked
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL];
+  const longURL = urlDatabase[shortURL].longURL;
   if (shortURL && longURL) {
     return res.redirect(longURL);
   }
   return res.end(`The ${shortURL} does not exist`);
 });
 
-// register route
+////////////////////// register route
 app.get("/register", (req, res) => {
   const templateVars = {
     user: req.cookies["user_id"]
@@ -102,7 +123,7 @@ app.get("/register", (req, res) => {
   return res.render("register", templateVars);
 });
 
-// a login route
+////////////////////// a login route
 app.get("/login", (req, res) => {
   const templateVars = {
     user: req.cookies["user_id"]
@@ -114,7 +135,10 @@ app.get("/login", (req, res) => {
   return res.render("login_page", templateVars);
 });
 
-// signs in using a cookie
+
+//////POST///////POST/////POST///////POST/////////POST/////POST//////
+
+////////////////////// SIGN IN REQUEST
 app.post("/login", (req, res) => {
   const foundUser = findUsers(req.body.email);
   const inputUserPass = req.body.inputPassword;
@@ -124,61 +148,62 @@ app.post("/login", (req, res) => {
     res.cookie('user_id', userID);
     return res.redirect("/urls");
   }
-  return res.end('<html><head><title>403: Forbidden</title></head><body><h1>403: Forbidden</h1></body></html>');
+  return res.send('<html><head><title>403: Forbidden</title></head><body><h1>403: Forbidden</h1></body></html>');
 });
 
-// using POST request to handle the "submit" button
+////////////////////// CREATE A NEW SHORT URL FOR LONG URL REQUEST
 app.post("/urls", (req, res) => {
-  console.log("this:",req.cookies["user_id"])
   if (!req.cookies["user_id"]) {
     return res.end('You cannot create new shortened URL if you are not logged in.');
   }   
-
-  // response after a submit button
+  // response after a submit button if user is logged in
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
+  urlDatabase[shortURL] = {
+    longURL: req.body.longURL,
+    userID: req.cookies["user_id"]
+  };
   return res.redirect(`/urls/${shortURL}`);
 });
 
-// edits the short URL using POST
+////////////////////// EDIT REQUEST
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
-  urlDatabase[id] = req.body.longURL;
+  if (!req.cookies["user_id"] || equalShortURL(id)) {
+    return res.end('You cannot create new shortened URL if you are not logged in.');
+  } 
+  urlDatabase[id] = {
+    longURL: req.body.longURL,
+    userID: req.cookies["user_id"]
+  };
   return res.redirect(`/urls/${id}`);
 });
 
-// deletes the URL using POST
+////////////////////// DELTE REQUEST
 app.post("/urls/:id/delete", (req, res) => {
-  const id = req.params.id;
-  delete urlDatabase[id];
+  const shortURLID = req.params.id;
+  if (!req.cookies["user_id"] || equalShortURL(shortURLID)) {
+    return res.end('Error. You are trying to delete an URL that does not exist or that you are not signed in.');
+  }   
+  delete urlDatabase[shortURLID];
   return res.redirect("/urls");
 });
 
-// logout request
+////////////////////// LOGOUT REQUEST
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   return res.redirect("/login");
 });
-/////////////////////////////////////
-// app.post("/login", (req, res) => {
-//   const foundUser = findUsers(req.body.email);
-//   const inputUserPass = req.body.inputPassword;
-//   if (foundUser && foundUser.password === inputUserPass) {
-//     const userID = foundUser.id;
-//     res.cookie('user_id', userID);
-//     return res.redirect("/urls");
-//   }
-//   return res.end('<html><head><title>403: Forbidden</title></head><body><h1>403: Forbidden</h1></body></html>');
-// });
 
+////////////////////// REGISTER REQUEST
 app.post("/register", (req, res) => {
   const randomUserID = generateRandomString();
   const newUserEmail = req.body.newUserEmail;
   const newUserPassword = req.body.inputPassword;
+  const newHashedUserPassword = bcrypt.hashSync(newUserPassword, 10);
   const newUserInfo = {
     id: randomUserID,
     email: newUserEmail,
-    password: newUserPassword
+    password: newHashedUserPassword
   };
   getUserByEmail(newUserInfo, res);
 
@@ -191,9 +216,12 @@ app.post("/register", (req, res) => {
 
 const generateRandomString = () => {
   let randomString = "";
-  for (let i = 0; i < 6; i++) {
-    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
-    randomString += alphabet[Math.floor(Math.random() * alphabet.length)];
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  const numbers = "1234567890";
+  const alphaNumbers = alphabet + numbers;
+  randomString += alphabet[Math.floor(Math.random() * alphabet.length)];
+  for (let i = 0; i < 5; i++) {
+    randomString += alphaNumbers[Math.floor(Math.random() * alphaNumbers.length)];
   }
   return randomString;
 };
@@ -219,3 +247,21 @@ const getUserByEmail = (inputInfo, res) => {
   return;
 };
 
+const urlsForUser = (userID) => {
+  const filteredURL = {};
+  for (const shortURL in urlDatabase) {
+    if (urlDatabase[shortURL]["userID"] === userID) {
+      filteredURL[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return filteredURL
+}
+
+const equalShortURL = (shortURL) => {
+  for (const shortURL in urlDatabase) {
+    if (urlDatabase[shortURL] === shortURL) {
+      return true;
+    }
+  }
+  return false;
+}
