@@ -26,9 +26,4 @@ describe('getUserByEmail', function() {
     const expectedUserID = undefined;
     assert.isTrue(user.id === expectedUserID, 'user ID does not match');
   });
-  it('should return undefined with an invalid email', function() {
-    const user = getUserByEmail("not@validemail.com", testUsers)
-    const expectedUserID = undefined;
-    assert.isTrue(user.id === expectedUserID, 'user ID does not match');
-  });
 });

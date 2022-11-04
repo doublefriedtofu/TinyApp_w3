@@ -54,8 +54,8 @@ const users = {
 };
 
 app.get("/", (req, res) => {
-  return res.send("Hello!");
-});
+    return res.redirect("/urls");
+  });
 
 // sends a message to conosle that server is running
 app.listen(PORT, () => {
@@ -70,7 +70,7 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
   const foundUserInfo = findUsersByID(req.session["user_id"]);
   if(!foundUserInfo) {
-    return res.redirect("/login");
+    return res.end('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">Login</button></form><form method="GET" action="/register"><button type="submit" class="btn btn-outline-primary">Register</button></form></html>');
   }
   // find the block of object
   const templateVars = {
@@ -88,7 +88,7 @@ app.get("/urls/new", (req, res) => {
     user: foundUserInfo
   };
   if (!templateVars.user) {
-    return res.end('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">Login</button></form><form method="GET" action="/register"><button type="submit" class="btn btn-outline-primary">Register</button></form></html>');
+    return res.redirect("/login");
     }
   return res.render("urls_new", templateVars);
 });
