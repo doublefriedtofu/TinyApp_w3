@@ -80,7 +80,7 @@ app.get("/urls/new", (req, res) => {
     user: foundUserInfo
   };
   if (!templateVars.user) {
-    return res.end('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">login</button><form method="GET" action="/register"><button type="submit" class="btn btn-outline-primary">Register</button></html>');
+    return res.end('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">Login</button></form><form method="GET" action="/register"><button type="submit" class="btn btn-outline-primary">Register</button></form></html>');
     }
   return res.render("urls_new", templateVars);
 });
@@ -90,7 +90,7 @@ app.get("/urls/:id", (req, res) => {
   const foundUserInfo = findUsersByID(req.cookies["user_id"]);
   // error message if not logged in
   if(!foundUserInfo) {
-    return res.end('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">login</button><form method="GET" action="/register"><button type="submit" class="btn btn-outline-primary">Register</button></html>');
+    return res.end('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">login</button></form><form method="GET" action="/register"><button type="submit" class="btn btn-outline-primary">Register</button></form></html>');
   }
   // find the block of object
   const templateVars = {
@@ -140,7 +140,7 @@ app.get("/login", (req, res) => {
 
 ////////////////////// SIGN IN REQUEST
 app.post("/login", (req, res) => {
-  const foundUser = findUsers(req.body.email);
+  const foundUser = findUsersByEmail(req.body.email);
   // if (bcrypt.compareSync(req.body.inputPassword, hashedPassword)) {;
   const inputUserPass = req.body.inputPassword;
   console.log(foundUser)
@@ -151,7 +151,7 @@ app.post("/login", (req, res) => {
     res.cookie('user_id', userID);
     return res.redirect("/urls");
   }
-  return res.send('<html><head><title>403: Forbidden</title></head><body><h1>403: Forbidden</h1></body></html>');
+  return res.send('403: Forbidden');
 });
 
 ////////////////////// CREATE A NEW SHORT URL FOR LONG URL REQUEST
@@ -212,9 +212,10 @@ app.post("/register", (req, res) => {
   };
   getUserByEmail(newUserInfo, res);
 
-  if (!findUsers(newUserEmail)) {
+  if (getUserByEmail(newUserInfo, res)) {
     users[randomUserID] = newUserInfo;
   }
+  console.log("New User registered!")
   res.cookie('user_id', randomUserID);
   return res.redirect("/urls");
 });
@@ -231,7 +232,7 @@ const generateRandomString = () => {
   return randomString;
 };
 
-const findUsers = (newUserEmail) => {
+const findUsersByEmail = (newUserEmail) => {
   for (const [key, value] of Object.entries(users)) {
     const usersToCheck = value["email"];
     if (usersToCheck === newUserEmail) {
@@ -246,10 +247,10 @@ const findUsersByID = (userID) => {
 };
 
 const getUserByEmail = (inputInfo, res) => {
-  if (!inputInfo.email || !inputInfo.password || findUsers(inputInfo.email)) {
-    return res.end('<html><head><title>403: Forbidden</title></head><body><h1>403: Forbidden</h1></body></html>');
+  if (!inputInfo.email || !inputInfo.password || findUsersByEmail(inputInfo.email)) {
+    return res.send('403: Forbidden');
   }
-  return;
+  return true;
 };
 
 const urlsForUser = (userID) => {
