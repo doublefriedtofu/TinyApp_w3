@@ -3,7 +3,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080;
-const { getUserByEmail } = require("./helper.js")
+const { getUserByEmail } = require("./helpers.js")
 
 // after submitting the POST request, the data is sent as a buffer.
 // This line is to read that data.
@@ -44,7 +44,7 @@ const users = {
   user1RandomID: {
     id: "user1RandomID",
     email: "user@example.com",
-    password: "123",
+    password: "purple-monkey-dinosaur",
   },
   user2RandomID: {
     id: "user2RandomID",
