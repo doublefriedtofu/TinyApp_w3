@@ -32,7 +32,7 @@ const urlsForUser = (urlData,userID) => {
       filteredURL[shortURL] = urlData[shortURL];
     }
   }
-  return filteredURL;
+  return null;
 };
 
 const equalShortURL = (urlData, shortURL) => {
@@ -45,4 +45,4 @@ const equalShortURL = (urlData, shortURL) => {
 };
 
 
-module.exports = { getUserByEmail, findUsersByID, urlsForUser, equalShortURL, generateRandomString }
+module.exports = { getUserByEmail, findUsersByID, urlsForUser, equalShortURL, generateRandomString };

@@ -34,21 +34,21 @@ app.get("/urls.json", (req, res) => {
 
 ////////////////////// a route for /urls
 app.get("/urls", (req, res) => {
-  const foundUserInfo = findUsersByID(users,req.session["user_id"]);
+  const foundUserInfo = findUsersByID(users, req.session["user_id"]);
   if (!foundUserInfo) {
-    return res.end('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">Login</button></form><form method="GET" action="/register"><button type="submit" class="btn btn-outline-primary">Register</button></form></html>');
+    return res.send('<h1>Please login or register</h1><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">Login</button></form><form method="GET" action="/register"><button type="submit" class="btn btn-outline-primary">Register</button></form>');
   }
   // find the block of object
   const templateVars = {
     user: foundUserInfo,
-    urls: urlsForUser(urlDatabase,foundUserInfo.id)
+    urls: urlsForUser(urlDatabase, foundUserInfo.id)
   };
   return res.render("urls_index", templateVars);
 });
 
 ////////////////////// adds a new route(page) to submit long url
 app.get("/urls/new", (req, res) => {
-  const foundUserInfo = findUsersByID(users,req.session["user_id"]);
+  const foundUserInfo = findUsersByID(users, req.session["user_id"]);
   // find the block of object
   const templateVars = {
     user: foundUserInfo
@@ -76,18 +76,22 @@ app.post("/urls", (req, res) => {
 
 ////////////////////// added a another route for /urls/:id; ":" tells that id is a route parameter
 app.get("/urls/:id", (req, res) => {
-  const foundUserInfo = findUsersByID(users,req.session["user_id"]);
+  const foundUserInfo = findUsersByID(users, req.session["user_id"]);
   // error message if not logged in
   if (!foundUserInfo) {
     return res.end('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">login</button></form><form method="GET" action="/register"><button type="submit" class="btn btn-outline-primary">Register</button></form></html>');
   }
   // find the block of object
-  const templateVars = {
-    shortURL: req.params.id,
-    user: foundUserInfo,
-    urls: urlsForUser(urlDatabase, foundUserInfo.id)
-  };
-  return res.render("urls_show", templateVars);
+  const urls = urlsForUser(urlDatabase, foundUserInfo.id);
+  if (urls) {
+    const templateVars = {
+      shortURL: req.params.id,
+      user: foundUserInfo,
+      urls: urlsForUser(urlDatabase, foundUserInfo.id)
+    };
+    return res.render("urls_show", templateVars);
+  }
+  return res.send("not found");
 });
 
 ////////////////////// redirects to the longURL page when clicked
@@ -103,7 +107,7 @@ app.get("/u/:id", (req, res) => {
 ////////////////////// EDIT REQUEST
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
-  if (!req.session.user_id || equalShortURL(urlDatabase ,id)) {
+  if (!req.session.user_id || equalShortURL(urlDatabase, id)) {
     return res.end('You cannot create new shortened URL if you are not logged in.');
   }
   urlDatabase[id] = {
@@ -164,11 +168,14 @@ app.post("/register", (req, res) => {
 
 ////////////////////// a login route
 app.get("/login", (req, res) => {
+  const userID = req.session["user_id"];
+  const user = users[userID];
+
   const templateVars = {
     user: req.session["user_id"]
   };
   // if the user is logged in, go to /urls otherwise to /login
-  if (templateVars.user) {
+  if (user) {
     return res.redirect("/urls");
   }
   return res.render("login_page", templateVars);
@@ -177,11 +184,13 @@ app.get("/login", (req, res) => {
 ////////////////////// SIGN IN REQUEST
 app.post("/login", (req, res) => {
   const foundUser = getUserByEmail(req.body.email, users);
-  // if encrypted input pass matches encrypted stored pass, go ahead.
-  if (bcrypt.compareSync(req.body.inputPassword, foundUser.password)) {
-    const userID = foundUser.id;
-    req.session.user_id = userID;
-    return res.redirect("/urls");
+  if (foundUser) {
+    // if encrypted input pass matches encrypted stored pass, go ahead.
+    if (bcrypt.compareSync(req.body.inputPassword, foundUser.password)) {
+      const userID = foundUser.id;
+      req.session.user_id = userID;
+      return res.redirect("/urls");
+    }
   }
   return res.send('403: Forbidden');
 });
