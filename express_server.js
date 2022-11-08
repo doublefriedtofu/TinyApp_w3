@@ -62,7 +62,7 @@ app.get("/urls/new", (req, res) => {
 ////////////////////// CREATE A NEW SHORT URL FOR LONG URL REQUEST
 app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
-    return res.end('You cannot create new shortened URL if you are not logged in.');
+    return res.send('You cannot create new shortened URL if you are not logged in.');
   }
   // response after a submit button if user is logged in
   const shortURL = generateRandomString();
@@ -79,7 +79,7 @@ app.get("/urls/:id", (req, res) => {
   const foundUserInfo = findUsersByID(users, req.session["user_id"]);
   // error message if not logged in
   if (!foundUserInfo) {
-    return res.end('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">login</button></form><form method="GET" action="/register"><button type="submit" class="btn btn-outline-primary">Register</button></form></html>');
+    return res.send('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">login</button></form><form method="GET" action="/register"><button type="submit" class="btn btn-outline-primary">Register</button></form></html>');
   }
   // find the block of object
   const urls = urlsForUser(urlDatabase, foundUserInfo.id);
@@ -94,21 +94,11 @@ app.get("/urls/:id", (req, res) => {
   return res.send("not found");
 });
 
-////////////////////// redirects to the longURL page when clicked
-app.get("/u/:id", (req, res) => {
-  const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL].longURL;
-  if (shortURL && longURL) {
-    return res.redirect(longURL);
-  }
-  return res.end(`The ${shortURL} does not exist`);
-});
-
 ////////////////////// EDIT REQUEST
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   if (!req.session.user_id || equalShortURL(urlDatabase, id)) {
-    return res.end('You cannot create new shortened URL if you are not logged in.');
+    return res.send('You cannot create new shortened URL if you are not logged in.');
   }
   urlDatabase[id] = {
     longURL: req.body.longURL,
@@ -117,11 +107,22 @@ app.post("/urls/:id", (req, res) => {
   return res.redirect(`/urls/${id}`);
 });
 
+////////////////////// redirects to the longURL page when clicked
+app.get("/u/:id", (req, res) => {
+  const shortURL = req.params.id;
+  const longURL = urlDatabase[shortURL].longURL;
+  if (shortURL && longURL) {
+    return res.redirect(longURL);
+  }
+  return res.send(`The ${shortURL} does not exist`);
+});
+
+
 ////////////////////// DELTE REQUEST
 app.post("/urls/:id/delete", (req, res) => {
   const shortURLID = req.params.id;
   if (!req.session.user_id || equalShortURL(urlDatabase, shortURLID)) {
-    return res.end('Error. You are trying to delete an URL that does not exist or that you are not signed in.');
+    return res.send('Error. You are trying to delete an URL that does not exist or that you are not signed in.');
   }
   delete urlDatabase[shortURLID];
   return res.redirect("/urls");
@@ -200,7 +201,6 @@ app.post("/logout", (req, res) => {
   req.session = null;
   return res.redirect("/login");
 });
-
 
 // sends a message to conosle that server is running
 app.listen(PORT, () => {
