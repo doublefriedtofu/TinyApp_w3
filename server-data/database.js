@@ -9,11 +9,11 @@ const urlDatabase = {
   },
   k3msdK: {
     longURL: "http://www.f2google.com",
-    userID: "user1RandomID",
+    userID: "mm0ueC",
   },
   k3masd: {
     longURL: "http://www.f3google.com",
-    userID: "user2RandomID",
+    userID: "mm0ueC",
   },
 };
 

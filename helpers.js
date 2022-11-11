@@ -21,18 +21,24 @@ const getUserByEmail = (inputEmail, database) => {
   return false;
 };
 
-const findUsersByID = (userData, userID) => {
-  return userData[userID];
-};
-
-const urlsForUser = (urlData,userID) => {
-  const filteredURL = {};
-  for (const shortURL in urlData) {
-    if (urlData[shortURL]["userID"] === userID) {
-      filteredURL[shortURL] = urlData[shortURL];
+const findUsersByID = (userID, database) => {
+  for (const [key, value] of Object.entries(database)) {
+    const usersToCheck = value["id"];
+    if (usersToCheck === userID) {
+      return database[value["id"]];
     }
   }
-  return null;
+  return false;
+};
+
+const urlsForUser = (urlData, userID) => {
+  const filteredURL = {};
+  for (const urlInfo in urlData) {
+    if (urlData[urlInfo]["userID"] === userID) {
+      filteredURL[urlInfo] = urlData[urlInfo];
+    }
+  }
+  return filteredURL;
 };
 
 const equalShortURL = (urlData, shortURL) => {

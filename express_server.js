@@ -34,7 +34,7 @@ app.get("/urls.json", (req, res) => {
 
 ////////////////////// a route for /urls
 app.get("/urls", (req, res) => {
-  const foundUserInfo = findUsersByID(users, req.session["user_id"]);
+  const foundUserInfo = findUsersByID(req.session["user_id"], users);
   if (!foundUserInfo) {
     return res.send('<h1>Please login or register</h1><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">Login</button></form><form method="GET" action="/register"><button type="submit" class="btn btn-outline-primary">Register</button></form>');
   }
@@ -48,7 +48,7 @@ app.get("/urls", (req, res) => {
 
 ////////////////////// adds a new route(page) to submit long url
 app.get("/urls/new", (req, res) => {
-  const foundUserInfo = findUsersByID(users, req.session["user_id"]);
+  const foundUserInfo = findUsersByID(req.session["user_id"], users);
   // find the block of object
   const templateVars = {
     user: foundUserInfo
@@ -76,18 +76,18 @@ app.post("/urls", (req, res) => {
 
 ////////////////////// added a another route for /urls/:id; ":" tells that id is a route parameter
 app.get("/urls/:id", (req, res) => {
-  const foundUserInfo = findUsersByID(users, req.session["user_id"]);
+  const foundUserInfo = findUsersByID(req.session["user_id"], users);
   // error message if not logged in
   if (!foundUserInfo) {
     return res.send('<html><head><title>NOPE</title></head><body><h1>Please login or register</h1></body><form method="GET" action="/login"><button type="submit" class="btn btn-outline-primary">login</button></form><form method="GET" action="/register"><button type="submit" class="btn btn-outline-primary">Register</button></form></html>');
   }
   // find the block of object
-  const urls = urlsForUser(urlDatabase, foundUserInfo.id);
-  if (urls) {
+  // const urls = urlsForUser(urlDatabase, foundUserInfo.id);
+  if (urlDatabase[req.params.id].userID === foundUserInfo.id) {
     const templateVars = {
       shortURL: req.params.id,
       user: foundUserInfo,
-      urls: urlsForUser(urlDatabase, foundUserInfo.id)
+      urls: urlDatabase[req.params.id],
     };
     return res.render("urls_show", templateVars);
   }
@@ -96,15 +96,15 @@ app.get("/urls/:id", (req, res) => {
 
 ////////////////////// EDIT REQUEST
 app.post("/urls/:id", (req, res) => {
-  const id = req.params.id;
-  if (!req.session.user_id || equalShortURL(urlDatabase, id)) {
+  const shotURLID = req.params.id;
+  if (!req.session.user_id || equalShortURL(urlDatabase, shotURLID)) {
     return res.send('You cannot create new shortened URL if you are not logged in.');
   }
-  urlDatabase[id] = {
+  urlDatabase[shotURLID] = {
     longURL: req.body.longURL,
     userID: req.session.user_id
   };
-  return res.redirect(`/urls/${id}`);
+  return res.redirect(`/urls/${shotURLID}`);
 });
 
 ////////////////////// redirects to the longURL page when clicked
